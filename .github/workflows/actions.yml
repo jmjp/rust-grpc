@@ -46,8 +46,24 @@ jobs:
         target: [x86_64-unknown-linux-musl]
     steps:
       - uses: actions/checkout@master
-      - name: Setup protoc
-        uses: arduino/setup-protoc@v2.0.0
+      - name: Cache protobuf library
+         id: cache-protobuf
+         uses: actions/cache@v1
+         with:
+           path: protobuf
+           key: ${{ runner.os }}-protobuf
+      - name: Build protobuf library
+         run: |
+           git clone https://github.com/protocolbuffers/protobuf.git
+           cd protobuf
+           git submodule update --init --recursive
+           ./autogen.sh
+           ./autogen.sh
+           ./configure
+           make
+           make check
+           sudo make install
+           sudo ldconfig 
       - name: Compile and release
         uses: rust-build/rust-build.action@master
         with:
