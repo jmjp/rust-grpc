@@ -47,23 +47,23 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Cache protobuf library
-         id: cache-protobuf
-         uses: actions/cache@v1
-         with:
-           path: protobuf
-           key: ${{ runner.os }}-protobuf
+        id: cache-protobuf
+        uses: actions/cache@v1
+        with:
+          path: protobuf
+          key: ${{ runner.os }}-protobuf
       - name: Build protobuf library
-         run: |
-           git clone https://github.com/protocolbuffers/protobuf.git
-           cd protobuf
-           git submodule update --init --recursive
-           ./autogen.sh
-           ./autogen.sh
-           ./configure
-           make
-           make check
-           sudo make install
-           sudo ldconfig 
+        run: |
+          git clone https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git submodule update --init --recursive
+          ./autogen.sh
+          ./autogen.sh
+          ./configure
+          make
+          make check
+          sudo make install
+          sudo ldconfig 
       - name: Compile and release
         uses: rust-build/rust-build.action@master
         with:
