@@ -1,61 +1,40 @@
-on:
-  release:
-    types: [created]
-  push:
+name: Rust application ephemeral environment build
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  release:
-    name: release ${{ matrix.target }} (with non-required env)
+  build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: x86_64-pc-windows-gnu
-            archive: zip
-          - target: x86_64-unknown-linux-musl
-            archive: tar.gz
-          - target: x86_64-apple-darwin
-            archive: zip
-          - target: wasm32-wasi
-            archive: zip tar.gz
+
     steps:
-      - uses: actions/checkout@master
-      - name: Compile and release
-        uses: rust-build/rust-build.action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          RUSTTARGET: ${{ matrix.target }}
-          EXTRA_FILES: "README.md"
-          SRC_DIR: "hello"
-          ARCHIVE_TYPES: ${{ matrix.archive }}
-          PRE_BUILD: "pre_build.sh"
-          POST_BUILD: "test/post_build.sh"
-          MINIFY: "yes"
-  release_without_not_required:
-    name: release ${{ matrix.target }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [x86_64-unknown-linux-musl]
-    steps:
-      - uses: actions/checkout@master 
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Install Protoc
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends --assume-yes protobuf-compiler
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          override: true
+          target: x86_64-unknown-linux-musl
 
-      - name: Check Protoc
-        run: protoc --version
-        
-      - name: Compile and release
-        uses: rust-build/rust-build.action@master
-        with:
-          RUSTTARGET: ${{ matrix.target }}
-          UPLOAD_MODE: none
+    - name: Configure sccache env var and set build profile to ephemeral build
+      run: echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV && echo “SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
 
-      - name: Checkout output
-        run: ls -laR
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v2
+
+    - name: Check Protoc
+      run: protoc --version
+
+    - name: Run sccache-cache
+      uses: mozilla-actions/sccache-action@v0.0.2
+      
+    - name: run bcp
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --target x86_64-unknown-linux-musl --release
