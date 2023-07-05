@@ -54,7 +54,7 @@ jobs:
         env:
             cache-name: pb
       - name: Install protobuf
-        run: ci/install-protobuf.sh
+        run: install-protobuf.sh
         shell: bash
         env:
             PROTOBUF_VERSION: 3.19.4
