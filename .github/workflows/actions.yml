@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@master 
 
       - name: Install Protoc
-        run: apt-get update && apt-get install --no-install-recommends --assume-yes protobuf-compiler
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends --assume-yes protobuf-compiler
 
       - name: Check Protoc
         run: protoc --version
