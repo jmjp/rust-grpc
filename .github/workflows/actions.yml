@@ -23,8 +23,6 @@ jobs:
             archive: zip tar.gz
     steps:
       - uses: actions/checkout@master
-      - name: Setup protoc
-        uses: arduino/setup-protoc@v2.0.0
       - name: Compile and release
         uses: rust-build/rust-build.action@master
         env:
@@ -45,26 +43,16 @@ jobs:
       matrix:
         target: [x86_64-unknown-linux-musl]
     steps:
-      - uses: actions/checkout@master
-      - name: Cache protobuf
-        uses: actions/cache@v2
-        with:
-            key: pb-linux-3.19.4
-            path: ~/pb
-        env:
-            cache-name: pb
-      - name: Install protobuf
-        run: ./install-protobuf.sh
-        shell: bash
-        env:
-            PROTOBUF_VERSION: 3.19.4
-      - name: Protoc check
-        run: protoc --version
-        shell: bash
+      - uses: actions/checkout@master 
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+        
       - name: Compile and release
         uses: rust-build/rust-build.action@master
         with:
           RUSTTARGET: ${{ matrix.target }}
           UPLOAD_MODE: none
+          
       - name: Checkout output
         run: ls -laR
