@@ -46,24 +46,21 @@ jobs:
         target: [x86_64-unknown-linux-musl]
     steps:
       - uses: actions/checkout@master
-      - name: Cache protobuf library
-        id: cache-protobuf
-        uses: actions/cache@v1
+      - name: Cache protobuf
+        uses: actions/cache@v2
         with:
-          path: protobuf
-          key: ${{ runner.os }}-protobuf
-      - name: Build protobuf library
-        run: |
-          git clone https://github.com/protocolbuffers/protobuf.git
-          cd protobuf
-          git submodule update --init --recursive
-          ./autogen.sh
-          ./autogen.sh
-          ./configure
-          make
-          make check
-          sudo make install
-          sudo ldconfig 
+            key: pb-linux-3.19.4
+            path: ~/pb
+        env:
+            cache-name: pb
+      - name: Install protobuf
+        run: ci/install-protobuf.sh
+        shell: bash
+        env:
+            PROTOBUF_VERSION: 3.19.4
+      - name: Protoc check
+        run: protoc --version
+        shell: bash
       - name: Compile and release
         uses: rust-build/rust-build.action@master
         with:
