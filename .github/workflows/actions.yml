@@ -46,13 +46,16 @@ jobs:
       - uses: actions/checkout@master 
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v2
+        run: apt-get update \ && DEBIAN_FRONTEND=noninteractive \ apt-get install --no-install-recommends --assume-yes \ protobuf-compiler
+
+      - name: Check Protoc
+        run: protoc --version
         
       - name: Compile and release
         uses: rust-build/rust-build.action@master
         with:
           RUSTTARGET: ${{ matrix.target }}
           UPLOAD_MODE: none
-          
+
       - name: Checkout output
         run: ls -laR
