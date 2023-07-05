@@ -26,9 +26,6 @@ jobs:
 
     - name: Check Protoc
       run: protoc --version
-
-    - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.2
       
     - name: run bcp
       uses: actions-rs/cargo@v1
